@@ -71,7 +71,7 @@ curl -X GET "{api}/ns/cloudflare/google.co.za"
     ]
 }
 ```
-curl -X GET "{api}/ptr/cloudflare/"
+curl -X GET "{api}/ptr/cloudflare/142.251.47.99"
 ```json
 {
     "ptr": [
