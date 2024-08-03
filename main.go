@@ -29,7 +29,7 @@ func main() {
 	}))
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
+		return c.SendString("API is running")
 	})
 	app.Get("/a/:dns/:domain", getARecord)
 	app.Get("/aaaa/:dns/:domain", getAAAARecord)
@@ -195,25 +195,45 @@ func getALLforDomain(c *fiber.Ctx) error {
 	if !ok {
 		return fiber.NewError(fiber.StatusBadRequest, "DNS server not found")
 	}
-	resolver := makeResolver(dnsIP)
-	ipv4s, _ := resolver.LookupIP(context.Background(), "ip4", domain)
-	ipv6s, _ := resolver.LookupIP(context.Background(), "ip6", domain)
-	cname, _ := resolver.LookupCNAME(context.Background(), domain)
-	mx, _ := resolver.LookupMX(context.Background(), domain)
-	ns, _ := resolver.LookupNS(context.Background(), domain)
-	txt, _ := resolver.LookupTXT(context.Background(), domain)
 
-	return c.JSON(
-		fiber.Map{
-			"ipv4":  ipv4s,
-			"ipv6":  ipv6s,
-			"cname": cname,
-			"mx":    mx,
-			"ns":    ns,
-			"txt":   txt,
-		},
-	)
+	resolver := makeResolver(dnsIP)
+	resultCh := make(chan map[string]interface{})
+	go func() {
+		ipv4s, _ := resolver.LookupIP(context.Background(), "ip4", domain)
+		resultCh <- map[string]interface{}{"ipv4s": ipv4s}
+	}()
+	go func() {
+		ipv6s, _ := resolver.LookupIP(context.Background(), "ip6", domain)
+		resultCh <- map[string]interface{}{"ipv6s": ipv6s}
+	}()
+	go func() {
+		cname, _ := resolver.LookupCNAME(context.Background(), domain)
+		resultCh <- map[string]interface{}{"cname": cname}
+	}()
+	go func() {
+		mx, _ := resolver.LookupMX(context.Background(), domain)
+		resultCh <- map[string]interface{}{"mx": mx}
+	}()
+	go func() {
+		ns, _ := resolver.LookupNS(context.Background(), domain)
+		resultCh <- map[string]interface{}{"ns": ns}
+	}()
+	go func() {
+		txt, _ := resolver.LookupTXT(context.Background(), domain)
+		resultCh <- map[string]interface{}{"txt": txt}
+	}()
+	result := make(map[string]interface{})
+
+	for i := 0; i < 6; i++ {
+		res := <-resultCh
+		for k, v := range res {
+			result[k] = v
+		}
+	}
+
+	return c.JSON(result)
 }
+
 func makeResolver(dnsIP string) net.Resolver {
 	return net.Resolver{
 		PreferGo: true,
