@@ -219,12 +219,16 @@ func getALLforDomain(c *fiber.Ctx) error {
 		resultCh <- map[string]interface{}{"ns": ns}
 	}()
 	go func() {
+		ptr, _ := resolver.LookupAddr(context.Background(), domain)
+		resultCh <- map[string]interface{}{"ptr": ptr}
+	}()
+	go func() {
 		txt, _ := resolver.LookupTXT(context.Background(), domain)
 		resultCh <- map[string]interface{}{"txt": txt}
 	}()
 	result := make(map[string]interface{})
 
-	for i := 0; i < 6; i++ {
+	for i := 0; i < 7; i++ {
 		res := <-resultCh
 		for k, v := range res {
 			result[k] = v
