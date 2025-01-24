@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"net"
 	"time"
 
@@ -15,6 +16,7 @@ var dnsServers = map[string]string{
 	"opendns":    "208.67.222.222:53",
 	"google":     "8.8.8.8:53",
 	"yandex":     "77.88.8.8:53",
+	"afrihost":   "169.1.1.1:53",
 }
 
 func main() {
@@ -55,7 +57,7 @@ func getARecord(c *fiber.Ctx) error {
 	resolver := makeResolver(dnsIP)
 	ipv4s, err := resolver.LookupIP(context.Background(), "ip4", domain)
 	if err != nil {
-		println(err.Error())
+		log.Default().Println(err.Error())
 		return fiber.NewError(fiber.StatusNotFound, "No records found")
 	}
 
@@ -77,7 +79,7 @@ func getAAAARecord(c *fiber.Ctx) error {
 	resolver := makeResolver(dnsIP)
 	ipv6s, err := resolver.LookupIP(context.Background(), "ip6", domain)
 	if err != nil {
-		println(err.Error())
+		log.Default().Println(err.Error())
 		return fiber.NewError(fiber.StatusNotFound, "No records found")
 	}
 	return c.JSON(
@@ -97,7 +99,7 @@ func getCNAMERecord(c *fiber.Ctx) error {
 	resolver := makeResolver(dnsIP)
 	cname, err := resolver.LookupCNAME(context.Background(), domain)
 	if err != nil {
-		println(err.Error())
+		log.Default().Println(err.Error())
 		return fiber.NewError(fiber.StatusNotFound, "No records found")
 	}
 	return c.JSON(
@@ -117,7 +119,7 @@ func getMXRecord(c *fiber.Ctx) error {
 	resolver := makeResolver(dnsIP)
 	mx, err := resolver.LookupMX(context.Background(), domain)
 	if err != nil {
-		println(err.Error())
+		log.Default().Println(err.Error())
 		return fiber.NewError(fiber.StatusNotFound, "No records found")
 	}
 
@@ -138,7 +140,7 @@ func getNSRecord(c *fiber.Ctx) error {
 	resolver := makeResolver(dnsIP)
 	ns, err := resolver.LookupNS(context.Background(), domain)
 	if err != nil {
-		println(err.Error())
+		log.Default().Println(err.Error())
 		return fiber.NewError(fiber.StatusNotFound, "No records found")
 	}
 	return c.JSON(
@@ -158,7 +160,7 @@ func getPTRRecord(c *fiber.Ctx) error {
 	resolver := makeResolver(dnsIP)
 	ptr, err := resolver.LookupAddr(context.Background(), ip)
 	if err != nil {
-		println(err.Error())
+		log.Default().Println(err.Error())
 		return fiber.NewError(fiber.StatusNotFound, "No records found")
 	}
 	return c.JSON(
@@ -178,7 +180,7 @@ func getTXTRecord(c *fiber.Ctx) error {
 	resolver := makeResolver(dnsIP)
 	txt, err := resolver.LookupTXT(context.Background(), domain)
 	if err != nil {
-		println(err.Error())
+		log.Default().Println(err.Error())
 		return fiber.NewError(fiber.StatusNotFound, "No records found")
 	}
 	return c.JSON(

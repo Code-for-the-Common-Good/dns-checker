@@ -1,0 +1,9 @@
+services:
+  app:
+    image: whyisybaactaken/dnschecker
+    build: 
+      context: .
+      dockerfile: Dockerfile.distroless
+    restart: always
+    ports:
+      - 3000:3000

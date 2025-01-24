@@ -6,7 +6,7 @@ COPY . .
 
 RUN go mod download
 
-RUN CGO_ENABLED=0 go build .
+RUN CGO_ENABLED=0 go build -ldflags="-w -s" .
 
 FROM gcr.io/distroless/static-debian12
 
